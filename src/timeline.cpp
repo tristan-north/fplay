@@ -7,7 +7,6 @@
 
 Timeline::Timeline(QWidget *parent) : QWidget(parent)
 {
-
 }
 
 
@@ -75,10 +74,21 @@ void Timeline::paintEvent(QPaintEvent *event) {
 }
 
 void Timeline::mouseMoveEvent(QMouseEvent *event) {
+    if( MainWindow::getInstance()->getNumFrames() < 2 )
+        return;
+    if( event->buttons() != Qt::LeftButton )
+        return;
+
+
     float x = static_cast<float>(event->pos().x());
 
     float spacingBetweenFrameTicks = static_cast<float>(rect().width()) / (MainWindow::getInstance()->getNumFrames()-1);
 
     int frameIdx = static_cast<int>( x / spacingBetweenFrameTicks + 0.5f);
     MainWindow::getInstance()->showFrame(frameIdx);
+}
+
+void Timeline::mousePressEvent(QMouseEvent *event) {
+    if( event->button() == Qt::LeftButton )
+        mouseMoveEvent(event);
 }

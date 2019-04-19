@@ -42,7 +42,7 @@ MainWindow::MainWindow()
     hboxLayoutBot->addWidget(m_timeline);
     m_vboxLayout.addLayout(hboxLayoutBot);
 
-    QTimer::singleShot(static_cast<int>(1000.0f/24.0f), this, SLOT(showNextFrame()));
+//    QTimer::singleShot(static_cast<int>(1000.0f/24.0f), this, SLOT(showNextFrame()));
 }
 
 
@@ -53,6 +53,9 @@ void MainWindow::appendFrame(Frame *frame) {
 
 
 void MainWindow::showFrame(int frameIdx) {
+    if(frameIdx >= m_frames.size() || m_frames.size() == 0 || frameIdx < 0)
+        return;
+
     Frame *frame = m_frames[frameIdx];
     m_label.resize(frame->m_resX, frame->m_resY);
     m_label.setPixmap(frame->m_pixmap);

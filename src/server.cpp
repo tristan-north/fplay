@@ -15,14 +15,14 @@ Server::Server(QObject *parent): QObject(parent)
         qInfo() << "Server could not start.";
     }
     else {
-        qInfo() << "Server started.";
+//        qInfo() << "Server started.";
     }
 
 }
 
 void Server::newConnection()
 {
-    qInfo() << "New connection.";
+//    qInfo() << "New connection.";
 
     QTcpSocket *socket = m_server->nextPendingConnection();
 
