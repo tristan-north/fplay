@@ -35,7 +35,6 @@ private:
     QLabel m_label;
     static MainWindow *instance;
     QVector<Frame*> m_frames;
-    QVBoxLayout m_vboxLayout;
     QPushButton *m_playButton;
     QLineEdit *m_currentFrameBox;
     Timeline *m_timeline;

@@ -18,7 +18,9 @@ SOURCES += \
     src/server.cpp \
     src/mainwindow.cpp \
     src/frame.cpp \
-    src/timeline.cpp
+    src/timeline.cpp \
+    src/seqlist.cpp \
+    src/sequence.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -29,4 +31,6 @@ HEADERS += \
     src/server.h \
     src/mainwindow.h \
     src/frame.h \
-    src/timeline.h
+    src/timeline.h \
+    src/seqlist.h \
+    src/sequence.h

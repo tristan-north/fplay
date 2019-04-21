@@ -3,6 +3,7 @@
 #include <QTimer>
 #include <QValidator>
 #include "mainwindow.h"
+#include "seqlist.h"
 
 
 MainWindow *MainWindow::instance = nullptr;
@@ -14,35 +15,46 @@ MainWindow::MainWindow()
     m_playing = false;
 
     resize(600,350);
-    m_vboxLayout.setContentsMargins(5,5,5,5);
+    QHBoxLayout *rootHboxLayout = new QHBoxLayout();
+    rootHboxLayout->setContentsMargins(5,0,5,5);
     setCentralWidget(new QWidget());
-    centralWidget()->setLayout(&m_vboxLayout);
+    centralWidget()->setLayout(rootHboxLayout);
 
-    m_vboxLayout.addStretch();
+    // Sequence list
+    SeqList *seqList = new SeqList(centralWidget());
+//    rootHboxLayout->addLayout(seqList->vboxLayout);
+    rootHboxLayout->addWidget(seqList);
+
+    // Image viewport
+    QVBoxLayout *vboxLayout = new QVBoxLayout();
+    rootHboxLayout->addLayout(vboxLayout);
+    vboxLayout->addStretch();
     QHBoxLayout *hboxLayout = new QHBoxLayout();
-    m_vboxLayout.addLayout(hboxLayout);
+    vboxLayout->addLayout(hboxLayout);
     hboxLayout->addStretch();
     hboxLayout->addWidget(&m_label);
     hboxLayout->addStretch();
-    m_vboxLayout.addStretch();
+    vboxLayout->addStretch();
 
+    // Play button
     QHBoxLayout *hboxLayoutBot = new QHBoxLayout();
     m_playButton = new QPushButton("Play", centralWidget());
     connect(m_playButton, SIGNAL(released()), this, SLOT(playButtonPushed()));
     hboxLayoutBot->addWidget(m_playButton);
     m_playButton->setFixedSize(90, 30);
 
+    // Current frame text box
     m_currentFrameBox = new QLineEdit(centralWidget());
     m_currentFrameBox->setValidator(new QIntValidator(-99999, 99999, this));
     connect(m_currentFrameBox, SIGNAL(editingFinished()), this, SLOT(currentFrameBoxSet()));
     hboxLayoutBot->addWidget(m_currentFrameBox);
     m_currentFrameBox->setFixedSize(50, 30);
 
+    // Timeline
     m_timeline = new Timeline(centralWidget());
     hboxLayoutBot->addWidget(m_timeline);
-    m_vboxLayout.addLayout(hboxLayoutBot);
+    vboxLayout->addLayout(hboxLayoutBot);
 
-//    QTimer::singleShot(static_cast<int>(1000.0f/24.0f), this, SLOT(showNextFrame()));
 }
 
 

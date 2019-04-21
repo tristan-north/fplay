@@ -24,6 +24,13 @@ char *readElement(const uchar *data, uint &offset)
     return dataString;
 }
 
+QString getBufferAsHexStr(const unsigned char* buf, int buffsize) {
+    QString result;
+    for(int i = 0; i < buffsize; ++i)
+        result += QString("%1").arg(buf[i], 2, 16, QChar('0')).toUpper();
+    return result;
+}
+
 
 Frame::Frame(const uchar *data) {
     // --- Read header ---
@@ -48,6 +55,8 @@ Frame::Frame(const uchar *data) {
         }
 
 //        qInfo() << "Data in: " << string;
+//        qInfo() << "Data in hex: " << getBufferAsHexStr(reinterpret_cast<uchar*>(string), QString(string).length()+1);
+
         delete[] string;
     }
 
