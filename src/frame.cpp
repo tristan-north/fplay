@@ -33,39 +33,51 @@ QString getBufferAsHexStr(const unsigned char* buf, int buffsize) {
 
 
 Frame::Frame(const uchar *data) {
+    m_resX = 0;
+    m_resY = 0;
+
     // --- Read header ---
 
-    // Read the 22 header strings
+    // Read the header strings
     uint offset = 0;
-    for(int i = 0; i < 22; i++) {
+    while(true) {
         char *string = readElement(data, offset);
+        QString qString(string);
 
         // First header string has info about the image eg:
         // R 38584 1920 1080 1920 1080 1 C 0 4 0 255
-        if(i==0) {
-            QStringList list = QString(string).split(' ');
+        if(m_resX == 0) {
+            QStringList list = qString.split(' ');
             m_resX = list[2].toInt();
             m_resY = list[3].toInt();
         }
 
-        // 20th header string has frame number
-        if(i==19) {
-            QStringList list = QString(string).split(' ');
+        // Get frame number from header
+        if(qString.startsWith("currentframe")) {
+            QStringList list = qString.split(' ');
             m_frameNum = list[1].toInt();
+            qInfo() << "currentframe from header: " << m_frameNum;
         }
 
 //        qInfo() << "Data in: " << string;
 //        qInfo() << "Data in hex: " << getBufferAsHexStr(reinterpret_cast<uchar*>(string), QString(string).length()+1);
 
         delete[] string;
+
+        // Doesn't seem to be an easy way to tell when the headers are finished and the data starts but
+        // the second last header seems to be P.
+        if(qString == QString("P"))
+            break;
     }
+
+    offset += 25; // This gets offset to where the int containing pixel data size is.
 
 
     // Get number of bytes of pixel data int from the header
     uint imageDataSize;
     memcpy(&imageDataSize, data+offset, sizeof(uint));
     imageDataSize = qFromBigEndian(imageDataSize);
-//    qInfo() << "imageDataSize: " << imageDataSize;
+    qInfo() << "imageDataSize: " << imageDataSize;
     offset += sizeof(uint) + 1;
 
     // -------------------
