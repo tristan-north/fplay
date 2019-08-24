@@ -3,12 +3,14 @@
 
 #include <QFrame>
 #include <QLayout>
+#include "sequence.h"
 
 class SeqList : public QFrame
 {
     Q_OBJECT
 public:
     explicit SeqList(QWidget *parent = nullptr);
+    Sequence *newSequence();
     QVBoxLayout *vboxLayout;
 
 signals:

@@ -3,15 +3,14 @@
 #include <QTimer>
 #include <QValidator>
 #include "mainwindow.h"
-#include "seqlist.h"
+
 
 
 MainWindow *MainWindow::instance = nullptr;
 
-MainWindow::MainWindow()
+MainWindow::MainWindow() : currentlyPlayingSeq(nullptr), currentlyFlippingSeq(nullptr), m_currentFrameNum(-1)
 {
     instance = this;
-    m_currentFrameIdx = 0;
     m_playing = false;
 
     resize(600,350);
@@ -21,7 +20,7 @@ MainWindow::MainWindow()
     centralWidget()->setLayout(rootHboxLayout);
 
     // Sequence list
-    SeqList *seqList = new SeqList(centralWidget());
+    seqList = new SeqList(centralWidget());
 //    rootHboxLayout->addLayout(seqList->vboxLayout);
     rootHboxLayout->addWidget(seqList);
 
@@ -57,13 +56,7 @@ MainWindow::MainWindow()
 
 }
 
-
-void MainWindow::appendFrame(Frame *frame) {
-    m_frames.append(frame);
-    showFrame(m_frames.size()-1);
-}
-
-
+/*
 void MainWindow::showFrame(int frameIdx) {
     if(frameIdx >= m_frames.size() || m_frames.size() == 0 || frameIdx < 0)
         return;
@@ -76,20 +69,31 @@ void MainWindow::showFrame(int frameIdx) {
     m_timeline->update();
     m_currentFrameBox->setText(QString::number(frame->m_frameNum));
 }
+*/
+void MainWindow::showFrame(Frame *frame) {
+    m_label.resize(frame->m_resX, frame->m_resY);
+    m_label.setPixmap(frame->m_pixmap);
+
+    m_currentFrameNum = frame->m_frameNum;
+
+    m_timeline->update();
+    m_currentFrameBox->setText(QString::number(frame->m_frameNum));
+}
 
 
 void MainWindow::showNextFrame() {
-    if(m_frames.size() < 2) {
+    if(currentlyPlayingSeq->getNumFrames() < 2) {
         if(m_playing)
             QTimer::singleShot(static_cast<int>(1000.0f/24.0f), this, SLOT(showNextFrame()));
         return;
     }
 
-    int nextIdx = m_currentFrameIdx + 1;
-    if(nextIdx >= m_frames.size())
-        nextIdx = 0;
+    Frame *frame = currentlyPlayingSeq->getFrameByFrameNum(m_currentFrameNum+1);
+    // Frame will be null if the next frame is after the end of the sequence
+    if(frame == nullptr)
+        frame = currentlyPlayingSeq->getFrameByIndex(0);
 
-    showFrame(nextIdx);
+    showFrame(frame);
 
     if(m_playing)
         QTimer::singleShot(static_cast<int>(1000.0f/24.0f), this, SLOT(showNextFrame()));
@@ -109,49 +113,21 @@ void MainWindow::playButtonPushed() {
 }
 
 void MainWindow::currentFrameBoxSet() {
-    if(m_frames.size()==0) {
+    if(currentlyPlayingSeq->getNumFrames()==0) {
         m_currentFrameBox->setText("");
         setFocus();
         return;
     }
 
-    int firstFrameNum = getFirstFrame()->m_frameNum;
-    int lastFrameNum = getLastFrame()->m_frameNum;
     int setFrame = m_currentFrameBox->text().toInt();
 
-    if(setFrame < firstFrameNum)
-        setFrame = firstFrameNum;
-    else if(setFrame > lastFrameNum)
-        setFrame = lastFrameNum;
+    Frame *frame = currentlyPlayingSeq->getFrameByFrameNum(setFrame);
+    if(frame == nullptr)
+        return;
 
-    int frameIdx = setFrame - firstFrameNum;
-    showFrame(frameIdx);
+    showFrame(frame);
 
     setFocus();
 }
 
 
-Frame *MainWindow::getCurrentFrame() {
-    if(m_frames.size()==0)
-        return nullptr;
-
-    return m_frames[m_currentFrameIdx];
-}
-
-Frame *MainWindow::getFirstFrame() {
-    if(m_frames.size()==0)
-        return nullptr;
-
-    return m_frames[0];
-}
-
-Frame *MainWindow::getLastFrame() {
-    if(m_frames.size()==0)
-        return nullptr;
-
-    return m_frames.last();
-}
-
-int MainWindow::getNumFrames() {
-    return m_frames.size();
-}

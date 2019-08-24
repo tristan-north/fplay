@@ -8,6 +8,8 @@
 #include <QLineEdit>
 #include "timeline.h"
 #include "frame.h"
+#include "seqlist.h"
+#include "sequence.h"
 
 
 class MainWindow : public QMainWindow
@@ -16,13 +18,11 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow();
     static MainWindow *getInstance() { return instance; }
-    void appendFrame(Frame *frame);
-    void showFrame(int frameIdx);
-    int m_currentFrameIdx;
-    Frame *getCurrentFrame();
-    Frame *getFirstFrame();
-    Frame *getLastFrame();
-    int getNumFrames();
+    void showFrame(Frame *frame);
+    SeqList *seqList;
+    Sequence *currentlyPlayingSeq;
+    Sequence *currentlyFlippingSeq;
+    int m_currentFrameNum;
 
 signals:
 
@@ -34,7 +34,6 @@ public slots:
 private:
     QLabel m_label;
     static MainWindow *instance;
-    QVector<Frame*> m_frames;
     QPushButton *m_playButton;
     QLineEdit *m_currentFrameBox;
     Timeline *m_timeline;

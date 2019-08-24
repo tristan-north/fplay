@@ -87,7 +87,25 @@ Frame::Frame(const uchar *data) {
     img = img.mirrored(false, true);
     m_pixmap = QPixmap::fromImage(img);
 
-    MainWindow::getInstance()->appendFrame(this);
+
+    ///////////////////////
+    // Figure out if this frame is a new sequence or not
+    MainWindow *mainWindow = MainWindow::getInstance();
+
+    // It's the first sequence is currentlyFlippingSeq is null
+    if(mainWindow->currentlyFlippingSeq == nullptr) {
+        mainWindow->currentlyFlippingSeq = mainWindow->seqList->newSequence();
+        mainWindow->currentlyPlayingSeq = mainWindow->currentlyFlippingSeq;
+    } else {
+
+    }
+
+    mainWindow->currentlyFlippingSeq->appendFrame(this);
 }
+
+
+
+
+
 
 
