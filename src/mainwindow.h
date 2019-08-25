@@ -20,8 +20,8 @@ public:
     static MainWindow *getInstance() { return instance; }
     void showFrame(Frame *frame);
     SeqList *seqList;
-    Sequence *currentlyPlayingSeq;
-    Sequence *currentlyFlippingSeq;
+//    Sequence *currentlyPlayingSeq;
+//    Sequence *currentlyFlippingSeq;
     int m_currentFrameNum;
 
 signals:
@@ -30,6 +30,10 @@ public slots:
     void showNextFrame();
     void playButtonPushed();
     void currentFrameBoxSet();
+    Sequence *getPlayingSequence();
+    Sequence *getFlippingSequence();
+    void setPlayingSequence(Sequence *seq);
+    void setFlippingSequence(Sequence *seq);
 
 private:
     QLabel m_label;
@@ -38,6 +42,8 @@ private:
     QLineEdit *m_currentFrameBox;
     Timeline *m_timeline;
     bool m_playing;
+    Sequence *m_currentlyPlayingSeq;
+    Sequence *m_currentlyFlippingSeq;
 };
 
 #endif // MAINWINDOW_H

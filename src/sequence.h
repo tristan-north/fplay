@@ -13,9 +13,11 @@ public:
     int getNumFrames();
     Frame *getFrameByFrameNum(int frameNum);
     Frame *getFrameByIndex(int frameIdx);
+    Frame *getLastFrame();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
+    void mousePressEvent(QMouseEvent *event);
 
 private:
     QVector<Frame*> m_frames;

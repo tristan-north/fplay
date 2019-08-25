@@ -8,7 +8,7 @@
 
 MainWindow *MainWindow::instance = nullptr;
 
-MainWindow::MainWindow() : currentlyPlayingSeq(nullptr), currentlyFlippingSeq(nullptr), m_currentFrameNum(-1)
+MainWindow::MainWindow() : m_currentFrameNum(-1), m_currentlyPlayingSeq(nullptr), m_currentlyFlippingSeq(nullptr)
 {
     instance = this;
     m_playing = false;
@@ -82,16 +82,16 @@ void MainWindow::showFrame(Frame *frame) {
 
 
 void MainWindow::showNextFrame() {
-    if(currentlyPlayingSeq->getNumFrames() < 2) {
+    if(m_currentlyPlayingSeq->getNumFrames() < 2) {
         if(m_playing)
             QTimer::singleShot(static_cast<int>(1000.0f/24.0f), this, SLOT(showNextFrame()));
         return;
     }
 
-    Frame *frame = currentlyPlayingSeq->getFrameByFrameNum(m_currentFrameNum+1);
+    Frame *frame = m_currentlyPlayingSeq->getFrameByFrameNum(m_currentFrameNum+1);
     // Frame will be null if the next frame is after the end of the sequence
     if(frame == nullptr)
-        frame = currentlyPlayingSeq->getFrameByIndex(0);
+        frame = m_currentlyPlayingSeq->getFrameByIndex(0);
 
     showFrame(frame);
 
@@ -106,14 +106,14 @@ void MainWindow::playButtonPushed() {
         m_playing = false;
     }
     else {
-        m_playButton->setText("Pause");
+        m_playButton->setText("Stop");
         m_playing = true;
         showNextFrame();
     }
 }
 
 void MainWindow::currentFrameBoxSet() {
-    if(currentlyPlayingSeq->getNumFrames()==0) {
+    if(m_currentlyPlayingSeq->getNumFrames()==0) {
         m_currentFrameBox->setText("");
         setFocus();
         return;
@@ -121,13 +121,33 @@ void MainWindow::currentFrameBoxSet() {
 
     int setFrame = m_currentFrameBox->text().toInt();
 
-    Frame *frame = currentlyPlayingSeq->getFrameByFrameNum(setFrame);
+    Frame *frame = m_currentlyPlayingSeq->getFrameByFrameNum(setFrame);
     if(frame == nullptr)
         return;
 
     showFrame(frame);
 
     setFocus();
+}
+
+Sequence *MainWindow::getPlayingSequence()
+{
+    return m_currentlyPlayingSeq;
+}
+
+Sequence *MainWindow::getFlippingSequence()
+{
+    return m_currentlyFlippingSeq;
+}
+
+void MainWindow::setPlayingSequence(Sequence *seq)
+{
+    m_currentlyPlayingSeq = seq;
+}
+
+void MainWindow::setFlippingSequence(Sequence *seq)
+{
+    m_currentlyFlippingSeq = seq;
 }
 
 

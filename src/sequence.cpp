@@ -1,5 +1,6 @@
 #include <QPainter>
 #include <QDebug>
+#include <QMouseEvent>
 #include "sequence.h"
 #include "mainwindow.h"
 
@@ -9,7 +10,8 @@ Sequence::Sequence(QWidget *parent) : QWidget(parent)
 }
 
 
-void Sequence::appendFrame(Frame *frame) {
+void Sequence::appendFrame(Frame *frame)
+{
     m_frames.append(frame);
 
     MainWindow *mainWindow = MainWindow::getInstance();
@@ -27,26 +29,25 @@ Frame *Sequence::getFrameByFrameNum(int frameNum)
     int firstFrameNum = m_frames[0]->m_frameNum;
     int frameIdx = frameNum - firstFrameNum;
 
-    getFrameByIndex(frameIdx);
-
-//    if(frameIdx >= m_frames.count())
-//        return nullptr;
-//    else
-//        return m_frames[frameIdx];
+    return getFrameByIndex(frameIdx);
 }
 
 Frame *Sequence::getFrameByIndex(int frameIdx)
 {
-    qInfo() << "frameIdx: " << frameIdx;
-
     if(frameIdx >= m_frames.count() || frameIdx < 0)
         return nullptr;
     else
         return m_frames[frameIdx];
 }
 
+Frame *Sequence::getLastFrame()
+{
+    return m_frames.last();
+}
 
-void Sequence::paintEvent(QPaintEvent *event) {
+
+void Sequence::paintEvent(QPaintEvent *event)
+{
     Q_UNUSED(event);
 
     QPainter painter(this);
@@ -57,4 +58,15 @@ void Sequence::paintEvent(QPaintEvent *event) {
     painter.drawRect(rect().x(), rect().y(), rect().width()-1, rect().height()-1);
 }
 
+void Sequence::mousePressEvent(QMouseEvent *event)
+{
+    MainWindow *mainWin = MainWindow::getInstance();
 
+    if( event->button() == Qt::LeftButton ) {
+        mainWin->setPlayingSequence(this);
+        Frame *frame = getFrameByFrameNum(mainWin->m_currentFrameNum);
+
+        if(frame != nullptr)
+            mainWin->showFrame(frame);
+    }
+}

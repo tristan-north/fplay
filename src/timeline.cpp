@@ -24,9 +24,9 @@ void Timeline::paintEvent(QPaintEvent *event) {
 
     int currentFrameNum = mainWin->m_currentFrameNum;
     int firstFrameNum{0}, numFrames{0};
-    if(mainWin->currentlyPlayingSeq && mainWin->currentlyPlayingSeq->getFrameByIndex(0)) {
-        firstFrameNum = mainWin->currentlyPlayingSeq->getFrameByIndex(0)->m_frameNum;
-        numFrames = mainWin->currentlyPlayingSeq->getNumFrames();
+    if(mainWin->getPlayingSequence() && mainWin->getPlayingSequence()->getFrameByIndex(0)) {
+        firstFrameNum = mainWin->getPlayingSequence()->getFrameByIndex(0)->m_frameNum;
+        numFrames = mainWin->getPlayingSequence()->getNumFrames();
     }
 
     if(numFrames > 1) {
@@ -70,7 +70,7 @@ void Timeline::paintEvent(QPaintEvent *event) {
 
 void Timeline::mouseMoveEvent(QMouseEvent *event) {
     MainWindow *mainWin{MainWindow::getInstance()};
-    int numFrames = mainWin->currentlyPlayingSeq->getNumFrames();
+    int numFrames = mainWin->getPlayingSequence()->getNumFrames();
     if( numFrames < 2 )
         return;
     if( event->buttons() != Qt::LeftButton )
@@ -82,7 +82,7 @@ void Timeline::mouseMoveEvent(QMouseEvent *event) {
     float spacingBetweenFrameTicks = static_cast<float>(rect().width()) / (numFrames-1);
 
     int frameIdx = static_cast<int>( x / spacingBetweenFrameTicks + 0.5f);
-    Frame *frame = mainWin->currentlyPlayingSeq->getFrameByIndex(frameIdx);
+    Frame *frame = mainWin->getPlayingSequence()->getFrameByIndex(frameIdx);
     if(frame)
         mainWin->showFrame(frame);
 }

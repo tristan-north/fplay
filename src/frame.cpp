@@ -88,19 +88,29 @@ Frame::Frame(const uchar *data) {
     m_pixmap = QPixmap::fromImage(img);
 
 
-    ///////////////////////
     // Figure out if this frame is a new sequence or not
     MainWindow *mainWindow = MainWindow::getInstance();
 
-    // It's the first sequence is currentlyFlippingSeq is null
-    if(mainWindow->currentlyFlippingSeq == nullptr) {
-        mainWindow->currentlyFlippingSeq = mainWindow->seqList->newSequence();
-        mainWindow->currentlyPlayingSeq = mainWindow->currentlyFlippingSeq;
+    // It's the first sequence if currentlyFlippingSeq is null
+    if(mainWindow->getFlippingSequence() == nullptr) {
+//        mainWindow->currentlyFlippingSeq = mainWindow->seqList->newSequence();
+//        mainWindow->currentlyPlayingSeq = mainWindow->currentlyFlippingSeq;
+
+        Sequence *seq = mainWindow->seqList->newSequence();
+        mainWindow->setFlippingSequence(seq);
+        mainWindow->setPlayingSequence(seq);
     } else {
+        // If the new frame number is 1 after the last frame of currentlyFlippingSeq it's part of the same sequence
+        int lastFrameNum = mainWindow->getFlippingSequence()->getLastFrame()->m_frameNum;
+        if(m_frameNum != lastFrameNum+1) {
+            Sequence *seq = mainWindow->seqList->newSequence();
+            mainWindow->setFlippingSequence(seq);
+            mainWindow->setPlayingSequence(seq);
+        }
 
     }
 
-    mainWindow->currentlyFlippingSeq->appendFrame(this);
+    mainWindow->getFlippingSequence()->appendFrame(this);
 }
 
 
