@@ -15,7 +15,7 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_currentlyPlayingSeq(nullptr)
     instance = this;
     m_playing = false;
 
-    resize(600,350);
+    resize(900,550);
     QPalette pal = QApplication::palette();
     pal.setColor(QPalette::Window, QColor(46,46,46));
     setAutoFillBackground(true);
@@ -23,28 +23,54 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_currentlyPlayingSeq(nullptr)
 
     QHBoxLayout *rootHboxLayout = new QHBoxLayout();
     rootHboxLayout->setContentsMargins(0,0,0,0);
+    rootHboxLayout->setSpacing(0);
     setCentralWidget(new QWidget());
     centralWidget()->setLayout(rootHboxLayout);
 
     // Sequence list
     seqList = new SeqList(centralWidget());
-//    rootHboxLayout->addLayout(seqList->vboxLayout);
     rootHboxLayout->addWidget(seqList);
 
     // Image viewport
+    QPalette viewportBkgPalette = QApplication::palette();
+    viewportBkgPalette.setColor(QPalette::Window, QColor(0,0,0));
+
+    QWidget *viewportBkgTop = new QWidget(centralWidget());
+    viewportBkgTop->setPalette(viewportBkgPalette);
+    viewportBkgTop->setAutoFillBackground(true);
+    viewportBkgTop->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QWidget *viewportBkgLeft = new QWidget(centralWidget());
+    viewportBkgLeft->setPalette(viewportBkgPalette);
+    viewportBkgLeft->setAutoFillBackground(true);
+    viewportBkgLeft->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QWidget *viewportBkgRight = new QWidget(centralWidget());
+    viewportBkgRight->setPalette(viewportBkgPalette);
+    viewportBkgRight->setAutoFillBackground(true);
+    viewportBkgRight->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QWidget *viewportBkgBot = new QWidget(centralWidget());
+    viewportBkgBot->setPalette(viewportBkgPalette);
+    viewportBkgBot->setAutoFillBackground(true);
+    viewportBkgBot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     QVBoxLayout *vboxLayout = new QVBoxLayout();
     rootHboxLayout->addLayout(vboxLayout);
-    vboxLayout->addStretch();
+    vboxLayout->addWidget(viewportBkgTop);
     QHBoxLayout *hboxLayout = new QHBoxLayout();
     vboxLayout->addLayout(hboxLayout);
-    hboxLayout->addStretch();
+    hboxLayout->addWidget(viewportBkgLeft);
+    m_label.hide();
     hboxLayout->addWidget(&m_label);
-    hboxLayout->addStretch();
-    vboxLayout->addStretch();
+    hboxLayout->addWidget(viewportBkgRight);
+    vboxLayout->addWidget(viewportBkgBot);
 
     // Play button
     QHBoxLayout *hboxLayoutBot = new QHBoxLayout();
     hboxLayoutBot->setContentsMargins(0,0,5,5);
+    hboxLayoutBot->setSpacing(5);
+    hboxLayoutBot->addSpacing(5);
     m_playButton = new QPushButton("Play", centralWidget());
 
     QPalette playPal = QApplication::palette();
@@ -74,24 +100,12 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_currentlyPlayingSeq(nullptr)
     // Timeline
     m_timeline = new Timeline(centralWidget());
     hboxLayoutBot->addWidget(m_timeline);
+    vboxLayout->addSpacing(4);
     vboxLayout->addLayout(hboxLayoutBot);
 
 }
 
-/*
-void MainWindow::showFrame(int frameIdx) {
-    if(frameIdx >= m_frames.size() || m_frames.size() == 0 || frameIdx < 0)
-        return;
 
-    Frame *frame = m_frames[frameIdx];
-    m_label.resize(frame->m_resX, frame->m_resY);
-    m_label.setPixmap(frame->m_pixmap);
-    m_currentFrameIdx = frameIdx;
-
-    m_timeline->update();
-    m_currentFrameBox->setText(QString::number(frame->m_frameNum));
-}
-*/
 void MainWindow::showFrame(Frame *frame) {
     if(frame == nullptr) {
         static QPixmap nullPixmap;
@@ -124,11 +138,18 @@ void MainWindow::showNextFrame() {
         return;
     }
 
+    // If current frame is the last frame of the sequence, show the first frame next
+    Frame *frame;
+    if(m_currentFrameNum == m_currentlyPlayingSeq->getLastFrame()->m_frameNum)
+        frame = m_currentlyPlayingSeq->getFrameByIndex(0);
+    else
+        frame = m_currentlyPlayingSeq->getFrameByFrameNum(m_currentFrameNum+1);
+     /*
     Frame *frame = m_currentlyPlayingSeq->getFrameByFrameNum(m_currentFrameNum+1);
     // Frame will be null if the next frame is after the end of the sequence
     if(frame == nullptr)
         frame = m_currentlyPlayingSeq->getFrameByIndex(0);
-
+*/
     showFrame(frame);
 
     if(m_playing)
@@ -175,6 +196,9 @@ void MainWindow::currentFrameBoxSet() {
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Delete) {
+        if(seqList->numSequences() == 0)
+            return;
+
         Sequence *seqToDelete = m_currentlyPlayingSeq;
 
         int currentIndex = seqList->getSequenceIndex(m_currentlyPlayingSeq);
@@ -188,6 +212,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             m_currentlyPlayingSeq = nullptr;
             m_currentlyFlippingSeq = nullptr;
             showFrame(nullptr);
+            m_label.hide();
         }
         else if(currentIndex == 0)
             setPlayingSequence(seqList->getSequenceByIndex(currentIndex+1));
@@ -210,6 +235,8 @@ Sequence *MainWindow::getFlippingSequence()
 
 void MainWindow::setPlayingSequence(Sequence *seq)
 {
+    m_label.show();
+
     m_currentlyPlayingSeq = seq;
 
     for(int i=0; i<seqList->numSequences(); i++) {

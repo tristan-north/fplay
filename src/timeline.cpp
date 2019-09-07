@@ -68,7 +68,8 @@ void Timeline::paintEvent(QPaintEvent *event) {
 
         // Draw current frame box
         int xPos = static_cast<int>((currentFrameNum-firstFrameNum) * xStepSize);
-        painter.drawRect(xPos-1, horizontalLineYPos-7, 2, 14);
+        if(xPos <= 0) xPos = 1;  // Account for getting cut off on the left size of the widget
+        painter.fillRect(xPos-1, horizontalLineYPos-7, 2, 14, QColor(200,200,200));
     }
 }
 

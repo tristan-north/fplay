@@ -4,12 +4,11 @@
 
 SeqList::SeqList(QWidget *parent) : QWidget(parent)
 {
-//    setFrameStyle(QFrame::Box);
-
     vboxLayout = new QVBoxLayout();
     vboxLayout->setContentsMargins(0, 0, 0, 0);
     vboxLayout->setSpacing(0);
-    vboxLayout->addStretch();
+//    vboxLayout->addStretch();
+    vboxLayout->addItem(new QSpacerItem(150, 10, QSizePolicy::Fixed, QSizePolicy::Expanding));
 
     QHBoxLayout *hboxLayout = new QHBoxLayout();
     hboxLayout->setContentsMargins(0, 0, 0, 0);
@@ -22,7 +21,7 @@ SeqList::SeqList(QWidget *parent) : QWidget(parent)
     seperator->setPalette(sepPal);
     seperator->setAutoFillBackground(true);
     hboxLayout->addWidget(seperator);
-    seperator->setFixedWidth(3);
+    seperator->setFixedWidth(2);
 
     setLayout(hboxLayout);
 }

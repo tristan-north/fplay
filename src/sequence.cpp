@@ -31,6 +31,11 @@ int Sequence::getNumFrames()
 Frame *Sequence::getFrameByFrameNum(int frameNum)
 {
     int firstFrameNum = m_frames[0]->m_frameNum;
+
+    //If frame is out of range return closest frame
+    if(frameNum < firstFrameNum) frameNum = firstFrameNum;
+    if(frameNum > getLastFrame()->m_frameNum) frameNum = getLastFrame()->m_frameNum;
+
     int frameIdx = frameNum - firstFrameNum;
 
     return getFrameByIndex(frameIdx);
