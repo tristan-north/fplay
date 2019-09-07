@@ -1,12 +1,16 @@
 #include <QPainter>
 #include <QDebug>
 #include <QMouseEvent>
+#include <QDateTime>
 #include "sequence.h"
 #include "mainwindow.h"
+#include "common.h"
 
 Sequence::Sequence(QWidget *parent) : QWidget(parent)
 {
     setFixedSize(150, 30);
+
+    m_title = QDateTime::currentDateTime().toString("hh:mm:ss");
 }
 
 
@@ -45,17 +49,43 @@ Frame *Sequence::getLastFrame()
     return m_frames.last();
 }
 
+void Sequence::deleteSeq()
+{
+    QVectorIterator<Frame*> itFrames(m_frames);
+    while (itFrames.hasNext()) {
+        delete itFrames.next();
+    }
+
+    delete this;
+}
+
 
 void Sequence::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
+    MainWindow *mainWin = MainWindow::getInstance();
 
     QPainter painter(this);
     QFontMetrics fontMetrics = painter.fontMetrics();
 
-    painter.drawText(10, rect().height()/2 + fontMetrics.height()/2 -3, "test");
+    // Draw bkg
+    int bkgColor = 50;
+    if(mainWin->getPlayingSequence() == this)
+        bkgColor = 60;
 
-    painter.drawRect(rect().x(), rect().y(), rect().width()-1, rect().height()-1);
+    painter.fillRect(0, 0, rect().width()-1, rect().height()-1, QColor(bkgColor, bkgColor, bkgColor));
+
+
+    // Draw text
+    if(mainWin->getPlayingSequence() == this)
+        painter.setPen(QColor(200,200,200));
+    else
+        painter.setPen(QColor(150,150,150));
+    painter.drawText(10, rect().height()/2 + fontMetrics.height()/2 -3, m_title);
+
+    // Draw line under widget
+    painter.setPen(QColor(20,20,20));
+    painter.drawLine(0, rect().height()-1, rect().width(), rect().height()-1);
 }
 
 void Sequence::mousePressEvent(QMouseEvent *event)

@@ -56,7 +56,7 @@ Frame::Frame(const uchar *data) {
         if(qString.startsWith("currentframe")) {
             QStringList list = qString.split(' ');
             m_frameNum = list[1].toInt();
-            qInfo() << "currentframe from header: " << m_frameNum;
+//            qInfo() << "currentframe from header: " << m_frameNum;
         }
 
 //        qInfo() << "Data in: " << string;
@@ -77,7 +77,7 @@ Frame::Frame(const uchar *data) {
     uint imageDataSize;
     memcpy(&imageDataSize, data+offset, sizeof(uint));
     imageDataSize = qFromBigEndian(imageDataSize);
-    qInfo() << "imageDataSize: " << imageDataSize;
+//    qInfo() << "imageDataSize: " << imageDataSize;
     offset += sizeof(uint) + 1;
 
     // -------------------

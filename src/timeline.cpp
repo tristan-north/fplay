@@ -4,6 +4,7 @@
 
 #include "timeline.h"
 #include "mainwindow.h"
+#include "common.h"
 
 Timeline::Timeline(QWidget *parent) : QWidget(parent)
 {
@@ -12,9 +13,12 @@ Timeline::Timeline(QWidget *parent) : QWidget(parent)
 
 
 void Timeline::paintEvent(QPaintEvent *event) {
+    Q_UNUSED(event);
+
     MainWindow *mainWin{MainWindow::getInstance()};
 
     QPainter painter(this);
+    painter.setPen(QColor(150,150,150));
     QFontMetrics fontMetrics = painter.fontMetrics();
     int horizontalLineYPos = rect().height()/2 + 5;
     //painter.drawRect(rect().x(), rect().y(), rect().width()-1, rect().height()-1);

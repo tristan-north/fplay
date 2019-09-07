@@ -33,4 +33,5 @@ HEADERS += \
     src/frame.h \
     src/timeline.h \
     src/seqlist.h \
-    src/sequence.h
+    src/sequence.h \
+    src/common.h

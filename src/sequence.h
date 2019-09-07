@@ -14,6 +14,7 @@ public:
     Frame *getFrameByFrameNum(int frameNum);
     Frame *getFrameByIndex(int frameIdx);
     Frame *getLastFrame();
+    void deleteSeq();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -21,6 +22,7 @@ protected:
 
 private:
     QVector<Frame*> m_frames;
+    QString m_title;
 
 signals:
 

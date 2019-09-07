@@ -2,7 +2,9 @@
 #include <QApplication>
 #include <QTimer>
 #include <QValidator>
+#include <QKeyEvent>
 #include "mainwindow.h"
+#include "common.h"
 
 
 
@@ -14,8 +16,13 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_currentlyPlayingSeq(nullptr)
     m_playing = false;
 
     resize(600,350);
+    QPalette pal = QApplication::palette();
+    pal.setColor(QPalette::Window, QColor(46,46,46));
+    setAutoFillBackground(true);
+    setPalette(pal);
+
     QHBoxLayout *rootHboxLayout = new QHBoxLayout();
-    rootHboxLayout->setContentsMargins(5,0,5,5);
+    rootHboxLayout->setContentsMargins(0,0,0,0);
     setCentralWidget(new QWidget());
     centralWidget()->setLayout(rootHboxLayout);
 
@@ -37,17 +44,32 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_currentlyPlayingSeq(nullptr)
 
     // Play button
     QHBoxLayout *hboxLayoutBot = new QHBoxLayout();
+    hboxLayoutBot->setContentsMargins(0,0,5,5);
     m_playButton = new QPushButton("Play", centralWidget());
+
+    QPalette playPal = QApplication::palette();
+    playPal.setColor(QPalette::Button, QColor(50,50,50));
+    playPal.setColor(QPalette::ButtonText, QColor(TEXTCOLOR));
+    playPal.setColor(QPalette::Window, QColor(30,30,30)); // The button border
+    m_playButton->setPalette(playPal);
+
     connect(m_playButton, SIGNAL(released()), this, SLOT(playButtonPushed()));
     hboxLayoutBot->addWidget(m_playButton);
-    m_playButton->setFixedSize(90, 30);
+    m_playButton->setFixedSize(60, 30);
 
     // Current frame text box
     m_currentFrameBox = new QLineEdit(centralWidget());
     m_currentFrameBox->setValidator(new QIntValidator(-99999, 99999, this));
+
+    QPalette framePal = QApplication::palette();
+    framePal.setColor(QPalette::Base, QColor(19,19,19));
+    framePal.setColor(QPalette::Window, QColor(19,19,19));  // The border
+    framePal.setColor(QPalette::Text, QColor(TEXTCOLOR));
+    m_currentFrameBox->setPalette(framePal);
+
     connect(m_currentFrameBox, SIGNAL(editingFinished()), this, SLOT(currentFrameBoxSet()));
     hboxLayoutBot->addWidget(m_currentFrameBox);
-    m_currentFrameBox->setFixedSize(50, 30);
+    m_currentFrameBox->setFixedSize(48, 25);
 
     // Timeline
     m_timeline = new Timeline(centralWidget());
@@ -71,6 +93,17 @@ void MainWindow::showFrame(int frameIdx) {
 }
 */
 void MainWindow::showFrame(Frame *frame) {
+    if(frame == nullptr) {
+        static QPixmap nullPixmap;
+        m_label.setPixmap(nullPixmap);
+
+        m_currentFrameNum = 0;
+
+        m_timeline->update();
+        m_currentFrameBox->setText("");
+        return;
+    }
+
     m_label.resize(frame->m_resX, frame->m_resY);
     m_label.setPixmap(frame->m_pixmap);
 
@@ -82,6 +115,9 @@ void MainWindow::showFrame(Frame *frame) {
 
 
 void MainWindow::showNextFrame() {
+    if(!m_currentlyPlayingSeq)
+        return;
+
     if(m_currentlyPlayingSeq->getNumFrames() < 2) {
         if(m_playing)
             QTimer::singleShot(static_cast<int>(1000.0f/24.0f), this, SLOT(showNextFrame()));
@@ -101,6 +137,9 @@ void MainWindow::showNextFrame() {
 
 
 void MainWindow::playButtonPushed() {
+    if(!m_currentlyPlayingSeq)
+        return;
+
     if(m_playing) {
         m_playButton->setText("Play");
         m_playing = false;
@@ -113,6 +152,9 @@ void MainWindow::playButtonPushed() {
 }
 
 void MainWindow::currentFrameBoxSet() {
+    if(!m_currentlyPlayingSeq)
+        return;
+
     if(m_currentlyPlayingSeq->getNumFrames()==0) {
         m_currentFrameBox->setText("");
         setFocus();
@@ -130,6 +172,32 @@ void MainWindow::currentFrameBoxSet() {
     setFocus();
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Delete) {
+        Sequence *seqToDelete = m_currentlyPlayingSeq;
+
+        int currentIndex = seqList->getSequenceIndex(m_currentlyPlayingSeq);
+
+        // If its the last sequence clean things up and stop playing if its currently playing.
+        if(seqList->numSequences() == 1) {
+            // Stop playing
+            if(m_playing)
+                playButtonPushed();
+
+            m_currentlyPlayingSeq = nullptr;
+            m_currentlyFlippingSeq = nullptr;
+            showFrame(nullptr);
+        }
+        else if(currentIndex == 0)
+            setPlayingSequence(seqList->getSequenceByIndex(currentIndex+1));
+        else
+            setPlayingSequence(seqList->getSequenceByIndex(currentIndex-1));
+
+        seqToDelete->deleteSeq();
+    }
+}
+
 Sequence *MainWindow::getPlayingSequence()
 {
     return m_currentlyPlayingSeq;
@@ -143,6 +211,11 @@ Sequence *MainWindow::getFlippingSequence()
 void MainWindow::setPlayingSequence(Sequence *seq)
 {
     m_currentlyPlayingSeq = seq;
+
+    for(int i=0; i<seqList->numSequences(); i++) {
+        seqList->getSequenceByIndex(i)->repaint();
+    }
+
 }
 
 void MainWindow::setFlippingSequence(Sequence *seq)

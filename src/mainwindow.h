@@ -19,21 +19,22 @@ public:
     explicit MainWindow();
     static MainWindow *getInstance() { return instance; }
     void showFrame(Frame *frame);
+    Sequence *getPlayingSequence();
+    Sequence *getFlippingSequence();
+    void setPlayingSequence(Sequence *seq);
+    void setFlippingSequence(Sequence *seq);
     SeqList *seqList;
-//    Sequence *currentlyPlayingSeq;
-//    Sequence *currentlyFlippingSeq;
     int m_currentFrameNum;
 
 signals:
 
 public slots:
-    void showNextFrame();
     void playButtonPushed();
+    void showNextFrame();
     void currentFrameBoxSet();
-    Sequence *getPlayingSequence();
-    Sequence *getFlippingSequence();
-    void setPlayingSequence(Sequence *seq);
-    void setFlippingSequence(Sequence *seq);
+
+protected:
+    void keyPressEvent(QKeyEvent *);
 
 private:
     QLabel m_label;
