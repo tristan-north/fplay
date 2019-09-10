@@ -88,29 +88,34 @@ Frame::Frame(const uchar *data) {
     m_pixmap = QPixmap::fromImage(img);
 
 
+
     // Figure out if this frame is a new sequence or not
+    bool isNewSeq = false;
     MainWindow *mainWindow = MainWindow::getInstance();
 
     // It's the first sequence if currentlyFlippingSeq is null
-    if(mainWindow->getFlippingSequence() == nullptr) {
-//        mainWindow->currentlyFlippingSeq = mainWindow->seqList->newSequence();
-//        mainWindow->currentlyPlayingSeq = mainWindow->currentlyFlippingSeq;
-
-        Sequence *seq = mainWindow->seqList->newSequence();
-        mainWindow->setFlippingSequence(seq);
-        mainWindow->setPlayingSequence(seq);
-    } else {
+    if(mainWindow->getFlippingSequence() == nullptr)
+        isNewSeq = true;
+    else {
         // If the new frame number is 1 after the last frame of currentlyFlippingSeq it's part of the same sequence
         int lastFrameNum = mainWindow->getFlippingSequence()->getLastFrame()->m_frameNum;
         if(m_frameNum != lastFrameNum+1) {
-            Sequence *seq = mainWindow->seqList->newSequence();
-            mainWindow->setFlippingSequence(seq);
-            mainWindow->setPlayingSequence(seq);
+            isNewSeq = true;
         }
-
     }
 
-    mainWindow->getFlippingSequence()->appendFrame(this);
+    if(isNewSeq) {
+        Sequence *seq = mainWindow->seqList->newSequence();
+        seq->appendFrame(this);
+        mainWindow->setFlippingSequence(seq);
+        mainWindow->setPlayingSequence(seq);
+    } else {
+        mainWindow->getFlippingSequence()->appendFrame(this);
+
+        // If playback is stopped and the currently playing seq is the flipping seq show the frame
+        if(!mainWindow->m_playing && mainWindow->getPlayingSequence() == mainWindow->getFlippingSequence())
+            mainWindow->showFrame(this);
+    }
 }
 
 

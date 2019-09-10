@@ -25,6 +25,7 @@ public:
     void setFlippingSequence(Sequence *seq);
     SeqList *seqList;
     int m_currentFrameNum;
+    bool m_playing;
 
 signals:
 
@@ -42,7 +43,6 @@ private:
     QPushButton *m_playButton;
     QLineEdit *m_currentFrameBox;
     Timeline *m_timeline;
-    bool m_playing;
     Sequence *m_currentlyPlayingSeq;
     Sequence *m_currentlyFlippingSeq;
 };

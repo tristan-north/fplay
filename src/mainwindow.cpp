@@ -82,6 +82,7 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_currentlyPlayingSeq(nullptr)
     connect(m_playButton, SIGNAL(released()), this, SLOT(playButtonPushed()));
     hboxLayoutBot->addWidget(m_playButton);
     m_playButton->setFixedSize(60, 30);
+    m_playButton->setFocusPolicy(Qt::NoFocus);
 
     // Current frame text box
     m_currentFrameBox = new QLineEdit(centralWidget());
@@ -221,6 +222,21 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
         seqToDelete->deleteSeq();
     }
+    else if (event->key() == Qt::Key_Space) {
+        playButtonPushed();
+    }
+    else if (event->key() == Qt::Key_Up) {
+        int currSeqIndex = seqList->getSequenceIndex(getPlayingSequence());
+
+        if(currSeqIndex > 0)
+            setPlayingSequence(seqList->getSequenceByIndex(currSeqIndex-1));
+    }
+    else if (event->key() == Qt::Key_Down) {
+        int currSeqIndex = seqList->getSequenceIndex(getPlayingSequence());
+
+        if(currSeqIndex < seqList->numSequences()-1)
+            setPlayingSequence(seqList->getSequenceByIndex(currSeqIndex+1));
+    }
 }
 
 Sequence *MainWindow::getPlayingSequence()
@@ -235,9 +251,13 @@ Sequence *MainWindow::getFlippingSequence()
 
 void MainWindow::setPlayingSequence(Sequence *seq)
 {
-    m_label.show();
+    m_label.show();  // Show incase image widget is currently hidden like if there are no prior sequences
 
     m_currentlyPlayingSeq = seq;
+
+    Frame *frame = seq->getFrameByFrameNum(m_currentFrameNum);
+    if(frame != nullptr)
+        showFrame(frame);
 
     for(int i=0; i<seqList->numSequences(); i++) {
         seqList->getSequenceByIndex(i)->repaint();

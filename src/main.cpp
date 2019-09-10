@@ -23,6 +23,5 @@ int main(int argc, char *argv[])
  - Add keyboard shortcuts
  - Frame timing would be more accurate if the time taken to render the frames and the exact time between the last frame shown was taken in to account
  - Support float image data
- - Check what happens when sequence is getting flipped and switch to play a different sequence
 
 */

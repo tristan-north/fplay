@@ -18,8 +18,6 @@ void Sequence::appendFrame(Frame *frame)
 {
     m_frames.append(frame);
 
-    MainWindow *mainWindow = MainWindow::getInstance();
-    mainWindow->showFrame(frame);
 }
 
 int Sequence::getNumFrames()
@@ -99,9 +97,5 @@ void Sequence::mousePressEvent(QMouseEvent *event)
 
     if( event->button() == Qt::LeftButton ) {
         mainWin->setPlayingSequence(this);
-        Frame *frame = getFrameByFrameNum(mainWin->m_currentFrameNum);
-
-        if(frame != nullptr)
-            mainWin->showFrame(frame);
     }
 }
