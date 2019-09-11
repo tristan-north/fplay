@@ -1,8 +1,7 @@
 #include <QApplication>
 #include "server.h"
 #include "frame.h"
-
-#define PORT 37381
+#include "common.h"
 
 
 Server::Server(QObject *parent): QObject(parent)

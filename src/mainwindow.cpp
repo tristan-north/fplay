@@ -10,10 +10,9 @@
 
 MainWindow *MainWindow::instance = nullptr;
 
-MainWindow::MainWindow() : m_currentFrameNum(-1), m_currentlyPlayingSeq(nullptr), m_currentlyFlippingSeq(nullptr)
+MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyPlayingSeq(nullptr), m_currentlyFlippingSeq(nullptr)
 {
     instance = this;
-    m_playing = false;
 
     resize(900,550);
     QPalette pal = QApplication::palette();
@@ -103,6 +102,8 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_currentlyPlayingSeq(nullptr)
     hboxLayoutBot->addWidget(m_timeline);
     vboxLayout->addSpacing(4);
     vboxLayout->addLayout(hboxLayoutBot);
+
+    setFocus(); // Set focus to main window otherwise the frame num text widget gets it on startup
 
 }
 

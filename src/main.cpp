@@ -1,27 +1,36 @@
 #include <QApplication>
+#include <QDir>
+#include <QRegularExpression>
 #include "server.h"
 #include "mainwindow.h"
+#include "common.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
+    // Create .flipbook_lock file
+    QString fileText = QStringLiteral("0 %1").arg(PORT);
+    QStringList houdiniDirs = QDir::home().entryList(QDir::Dirs);
+    QRegularExpression re("houdini\\d\\d.\\d");
+    QString hostname = QString::fromLocal8Bit(qgetenv("HOSTNAME"));
+
+    for(int i=0; i<houdiniDirs.size(); i++) {
+        if(houdiniDirs[i].contains(re)) {
+            QString filePath = QDir::home().filePath(houdiniDirs[i] + "/.flipbook_lock." + hostname);
+            QFile file(filePath);
+            file.open(QIODevice::WriteOnly);
+            file.write(fileText.toUtf8());
+            file.close();
+        }
+    }
+
+    // Create app window
     MainWindow mainWin;
-
     Server mServer;
-
     mainWin.show();
 
     return app.exec();
 }
 
 
-/* TODO
-
-
- - When launched create the necessary .flipbook_lock file
- - Add keyboard shortcuts
- - Frame timing would be more accurate if the time taken to render the frames and the exact time between the last frame shown was taken in to account
- - Support float image data
-
-*/
