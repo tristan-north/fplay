@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     // Create .flipbook_lock file
-    QString fileText = QStringLiteral("0 %1").arg(PORT);
+    QString fileText = QStringLiteral("0 %1\n").arg(PORT);
     QStringList houdiniDirs = QDir::home().entryList(QDir::Dirs);
     QRegularExpression re("houdini\\d\\d.\\d");
     QString hostname = QString::fromLocal8Bit(qgetenv("HOSTNAME"));

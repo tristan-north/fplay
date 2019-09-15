@@ -8,7 +8,7 @@
 
 Sequence::Sequence(QWidget *parent) : QWidget(parent)
 {
-    setFixedSize(150, 30);
+    setFixedSize(150, 45);
 
     m_title = QDateTime::currentDateTime().toString("hh:mm:ss");
 }
@@ -78,13 +78,38 @@ void Sequence::paintEvent(QPaintEvent *event)
 
     painter.fillRect(0, 0, rect().width()-1, rect().height()-1, QColor(bkgColor, bkgColor, bkgColor));
 
+    // Draw icon, aspect ratio of icon area is 1920x1080
+    QPixmap *iconPixmap = &getFrameByIndex(0)->m_pixmap;
+    int verticalPadding = 5;
+    int leftEdgeOffset = 5;
+    int iconAreaHeight = rect().height() - verticalPadding*2 - 3;                     // Area not including the frame
+    int iconAreaWidth = static_cast<int>(1920.f/1080.f * iconAreaHeight + .5f);       // Area not including the frame
+
+    painter.fillRect(leftEdgeOffset, verticalPadding, iconAreaWidth+2, iconAreaHeight+2, QColor(0, 0, 0));
+
+    int drawHeight = rect().height() - verticalPadding*2 - 2;
+    int drawWidth = iconAreaWidth;
+    if(iconPixmap->width()/iconPixmap->height() > drawWidth/drawHeight) {
+        // Pixmap aspect ratio is wider than the area to draw to
+        float scaleFactor = static_cast<float>(drawWidth) / iconPixmap->width();
+        drawHeight = static_cast<int>(iconPixmap->height()*scaleFactor+0.5f);
+    } else {
+        // Pixmap aspect ratio is taller than the area to draw to
+        float scaleFactor = static_cast<float>(drawHeight) / iconPixmap->height();
+        drawWidth = static_cast<int>(iconPixmap->width()*scaleFactor+0.5f);
+    }
+    int xOffsetToCenter = (iconAreaWidth - drawWidth) / 2;
+    int yOffsetToCenter = (iconAreaHeight - drawHeight) / 2;
+    painter.drawPixmap(leftEdgeOffset+1+xOffsetToCenter, verticalPadding+1+yOffsetToCenter, drawWidth, drawHeight, *iconPixmap);
+
 
     // Draw text
     if(mainWin->getPlayingSequence() == this)
         painter.setPen(QColor(200,200,200));
     else
         painter.setPen(QColor(150,150,150));
-    painter.drawText(10, rect().height()/2 + fontMetrics.height()/2 -3, m_title);
+    painter.drawText(70, rect().height()/2 + fontMetrics.height()/2 -3, m_title);
+
 
     // Draw line under widget
     painter.setPen(QColor(20,20,20));

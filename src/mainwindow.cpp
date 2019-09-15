@@ -13,6 +13,8 @@ MainWindow *MainWindow::instance = nullptr;
 MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyPlayingSeq(nullptr), m_currentlyFlippingSeq(nullptr)
 {
     instance = this;
+    showNextFrameTimer.setInterval(int(1000.0f/24.0f));
+    QObject::connect(&showNextFrameTimer, SIGNAL(timeout()), this, SLOT(showNextFrame()));
 
     resize(900,550);
     QPalette pal = QApplication::palette();
@@ -135,9 +137,7 @@ void MainWindow::showNextFrame() {
         return;
 
     if(m_currentlyPlayingSeq->getNumFrames() < 2) {
-        if(m_playing)
-            QTimer::singleShot(static_cast<int>(1000.0f/24.0f), this, SLOT(showNextFrame()));
-        return;
+       return;
     }
 
     // If current frame is the last frame of the sequence, show the first frame next
@@ -146,16 +146,8 @@ void MainWindow::showNextFrame() {
         frame = m_currentlyPlayingSeq->getFrameByIndex(0);
     else
         frame = m_currentlyPlayingSeq->getFrameByFrameNum(m_currentFrameNum+1);
-     /*
-    Frame *frame = m_currentlyPlayingSeq->getFrameByFrameNum(m_currentFrameNum+1);
-    // Frame will be null if the next frame is after the end of the sequence
-    if(frame == nullptr)
-        frame = m_currentlyPlayingSeq->getFrameByIndex(0);
-*/
-    showFrame(frame);
 
-    if(m_playing)
-        QTimer::singleShot(static_cast<int>(1000.0f/24.0f), this, SLOT(showNextFrame()));
+    showFrame(frame);
 }
 
 
@@ -166,11 +158,13 @@ void MainWindow::playButtonPushed() {
     if(m_playing) {
         m_playButton->setText("Play");
         m_playing = false;
+        showNextFrameTimer.stop();
     }
     else {
         m_playButton->setText("Stop");
         m_playing = true;
         showNextFrame();
+        showNextFrameTimer.start();
     }
 }
 
@@ -237,6 +231,56 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
         if(currSeqIndex < seqList->numSequences()-1)
             setPlayingSequence(seqList->getSequenceByIndex(currSeqIndex+1));
+    }
+    else if (event->key() == Qt::Key_Right) {
+        if(!m_currentlyPlayingSeq)
+            return;
+
+        if(m_playing)
+            playButtonPushed();
+
+        Frame *frame;
+        int frameNumToShow = m_currentFrameNum + 1;
+        if(frameNumToShow > m_currentlyPlayingSeq->getLastFrame()->m_frameNum)
+            frame = m_currentlyPlayingSeq->getFrameByIndex(0);
+        else
+            frame = m_currentlyPlayingSeq->getFrameByFrameNum(frameNumToShow);
+
+        showFrame(frame);
+    }
+    else if (event->key() == Qt::Key_Left) {
+        if(!m_currentlyPlayingSeq)
+            return;
+
+        if(m_playing)
+            playButtonPushed();
+
+        Frame *frame;
+        int frameNumToShow = m_currentFrameNum - 1;
+        if(frameNumToShow < m_currentlyPlayingSeq->getFrameByIndex(0)->m_frameNum)
+            frame = m_currentlyPlayingSeq->getLastFrame();
+        else
+            frame = m_currentlyPlayingSeq->getFrameByFrameNum(frameNumToShow);
+
+        showFrame(frame);
+    }
+    else if (event->key() == Qt::Key_Home) {
+        if(!m_currentlyPlayingSeq)
+            return;
+
+        if(m_playing)
+            playButtonPushed();
+
+        showFrame(m_currentlyPlayingSeq->getFrameByIndex(0));
+    }
+    else if (event->key() == Qt::Key_End) {
+        if(!m_currentlyPlayingSeq)
+            return;
+
+        if(m_playing)
+            playButtonPushed();
+
+        showFrame(m_currentlyPlayingSeq->getLastFrame());
     }
 }
 

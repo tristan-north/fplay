@@ -6,6 +6,7 @@
 #include <QLayout>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QTimer>
 #include "timeline.h"
 #include "frame.h"
 #include "seqlist.h"
@@ -45,6 +46,7 @@ private:
     Timeline *m_timeline;
     Sequence *m_currentlyPlayingSeq;
     Sequence *m_currentlyFlippingSeq;
+    QTimer showNextFrameTimer;
 };
 
 #endif // MAINWINDOW_H
