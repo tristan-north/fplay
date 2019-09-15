@@ -36,36 +36,37 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyP
     QPalette viewportBkgPalette = QApplication::palette();
     viewportBkgPalette.setColor(QPalette::Window, QColor(0,0,0));
 
-    QWidget *viewportBkgTop = new QWidget(centralWidget());
-    viewportBkgTop->setPalette(viewportBkgPalette);
-    viewportBkgTop->setAutoFillBackground(true);
-    viewportBkgTop->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_viewportBkgTop = new QWidget();
+    m_viewportBkgTop->setPalette(viewportBkgPalette);
+    m_viewportBkgTop->setAutoFillBackground(true);
+    m_viewportBkgTop->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    QWidget *viewportBkgLeft = new QWidget(centralWidget());
-    viewportBkgLeft->setPalette(viewportBkgPalette);
-    viewportBkgLeft->setAutoFillBackground(true);
-    viewportBkgLeft->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_viewportBkgLeft = new QWidget();
+    m_viewportBkgLeft->setPalette(viewportBkgPalette);
+    m_viewportBkgLeft->setAutoFillBackground(true);
+    m_viewportBkgLeft->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-    QWidget *viewportBkgRight = new QWidget(centralWidget());
-    viewportBkgRight->setPalette(viewportBkgPalette);
-    viewportBkgRight->setAutoFillBackground(true);
-    viewportBkgRight->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_viewportBkgRight = new QWidget();
+    m_viewportBkgRight->setPalette(viewportBkgPalette);
+    m_viewportBkgRight->setAutoFillBackground(true);
+    m_viewportBkgRight->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-    QWidget *viewportBkgBot = new QWidget(centralWidget());
-    viewportBkgBot->setPalette(viewportBkgPalette);
-    viewportBkgBot->setAutoFillBackground(true);
-    viewportBkgBot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_viewportBkgBot = new QWidget();
+    m_viewportBkgBot->setPalette(viewportBkgPalette);
+    m_viewportBkgBot->setAutoFillBackground(true);
+    m_viewportBkgBot->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QVBoxLayout *vboxLayout = new QVBoxLayout();
     rootHboxLayout->addLayout(vboxLayout);
-    vboxLayout->addWidget(viewportBkgTop);
+    vboxLayout->addWidget(m_viewportBkgTop);
     QHBoxLayout *hboxLayout = new QHBoxLayout();
     vboxLayout->addLayout(hboxLayout);
-    hboxLayout->addWidget(viewportBkgLeft);
+    hboxLayout->addWidget(m_viewportBkgLeft);
     m_label.hide();
+
     hboxLayout->addWidget(&m_label);
-    hboxLayout->addWidget(viewportBkgRight);
-    vboxLayout->addWidget(viewportBkgBot);
+    hboxLayout->addWidget(m_viewportBkgRight);
+    vboxLayout->addWidget(m_viewportBkgBot);
 
     // Play button
     QHBoxLayout *hboxLayoutBot = new QHBoxLayout();
@@ -122,8 +123,8 @@ void MainWindow::showFrame(Frame *frame) {
         return;
     }
 
-    m_label.resize(frame->m_resX, frame->m_resY);
     m_label.setPixmap(frame->m_pixmap);
+    m_label.resize(frame->m_resX, frame->m_resY);
 
     m_currentFrameNum = frame->m_frameNum;
 
@@ -313,6 +314,38 @@ void MainWindow::setPlayingSequence(Sequence *seq)
 void MainWindow::setFlippingSequence(Sequence *seq)
 {
     m_currentlyFlippingSeq = seq;
+}
+
+QSize MainWindow::getViewportSize()
+{
+    QSize size;
+
+    if(m_label.isVisible()) {
+        size.setWidth(m_label.width() + m_viewportBkgLeft->width() + m_viewportBkgRight->width());
+        size.setHeight(m_label.height() + m_viewportBkgTop->height() + m_viewportBkgBot->height());
+    }
+    else {
+        size.setWidth(m_viewportBkgLeft->width() + m_viewportBkgRight->width());
+        size.setHeight(m_viewportBkgTop->height() + m_viewportBkgBot->height());
+    }
+
+    return size;
+}
+
+void MainWindow::resizeMainWindow()
+{
+    int margin = 30;
+
+    int newWidth = m_label.size().width() + seqList->size().width() + margin*2;
+    int newHeight = m_label.size().height() + m_playButton->size().height() + margin*2 + 9; // +9 to account for padding
+
+    // New resize window to be smaller in either width or height
+    if(newWidth < size().width())
+        newWidth = size().width();
+    if(newHeight < size().height())
+        newHeight = size().height();
+
+    resize(newWidth, newHeight);
 }
 
 

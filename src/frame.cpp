@@ -105,10 +105,18 @@ Frame::Frame(const uchar *data) {
     }
 
     if(isNewSeq) {
+        // If new resolution is bigger than current viewport size resize main win
+
+        if(m_resX > mainWindow->getViewportSize().width() ||
+                m_resY > mainWindow->getViewportSize().height())
+            QTimer::singleShot(0, mainWindow, SLOT(resizeMainWindow()));
+
+
         Sequence *seq = mainWindow->seqList->newSequence();
         seq->appendFrame(this);
         mainWindow->setFlippingSequence(seq);
         mainWindow->setPlayingSequence(seq);
+
     } else {
         mainWindow->getFlippingSequence()->appendFrame(this);
 

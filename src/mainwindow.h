@@ -24,6 +24,7 @@ public:
     Sequence *getFlippingSequence();
     void setPlayingSequence(Sequence *seq);
     void setFlippingSequence(Sequence *seq);
+    QSize getViewportSize();
     SeqList *seqList;
     int m_currentFrameNum;
     bool m_playing;
@@ -34,6 +35,7 @@ public slots:
     void playButtonPushed();
     void showNextFrame();
     void currentFrameBoxSet();
+    void resizeMainWindow();
 
 protected:
     void keyPressEvent(QKeyEvent *);
@@ -47,6 +49,7 @@ private:
     Sequence *m_currentlyPlayingSeq;
     Sequence *m_currentlyFlippingSeq;
     QTimer showNextFrameTimer;
+    QWidget *m_viewportBkgTop, *m_viewportBkgBot, *m_viewportBkgLeft, *m_viewportBkgRight;
 };
 
 #endif // MAINWINDOW_H
