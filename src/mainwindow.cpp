@@ -3,6 +3,8 @@
 #include <QTimer>
 #include <QValidator>
 #include <QKeyEvent>
+#include <QScrollArea>
+#include <QScrollBar>
 #include "mainwindow.h"
 #include "common.h"
 
@@ -30,7 +32,42 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyP
 
     // Sequence list
     seqList = new SeqList(centralWidget());
-    rootHboxLayout->addWidget(seqList);
+    seqList->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    seqScrollArea = new QScrollArea;
+    seqScrollArea->setFocusPolicy(Qt::NoFocus);
+
+    seqScrollArea->verticalScrollBar()->setStyleSheet(QString::fromUtf8(
+           "QScrollBar:vertical {"
+            "    border: 1px solid rgb(20, 20, 20);"
+            "    background: rgb(32, 32, 32);"
+            "    width:10px;    "
+            "    margin: 0px 0px 0px 0px;"
+            "}"
+
+            "QScrollBar::handle:vertical {"
+            "    background: rgb(60, 60, 60);"
+            "    min-height: 0px;"
+            "    border-radius: 4px;"
+            "}"
+            "QScrollBar::add-line:vertical {"
+            "    height: 0px;"
+            "    subcontrol-position: bottom;"
+            "    subcontrol-origin: margin;"
+            "}"
+            "QScrollBar::sub-line:vertical {"
+            "    height: 0 px;"
+            "    subcontrol-position: top;"
+            "    subcontrol-origin: margin;"
+            "}"
+            ));
+
+
+    seqScrollArea->setWidgetResizable(true);
+    seqScrollArea->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    seqScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    seqScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    seqScrollArea->setWidget(seqList);
+    rootHboxLayout->addWidget(seqScrollArea);
 
     // Image viewport
     QPalette viewportBkgPalette = QApplication::palette();
@@ -300,6 +337,7 @@ void MainWindow::setPlayingSequence(Sequence *seq)
     m_label.show();  // Show incase image widget is currently hidden like if there are no prior sequences
 
     m_currentlyPlayingSeq = seq;
+    seqScrollArea->ensureWidgetVisible(seq, 0, 0);
 
     Frame *frame = seq->getFrameByFrameNum(m_currentFrameNum);
     if(frame != nullptr)
@@ -339,7 +377,7 @@ void MainWindow::resizeMainWindow()
     int newWidth = m_label.size().width() + seqList->size().width() + margin*2;
     int newHeight = m_label.size().height() + m_playButton->size().height() + margin*2 + 9; // +9 to account for padding
 
-    // New resize window to be smaller in either width or height
+    // Don't resize window to be smaller in either width or height
     if(newWidth < size().width())
         newWidth = size().width();
     if(newHeight < size().height())

@@ -1,5 +1,6 @@
 #include <QLabel>
 #include "seqlist.h"
+#include "mainwindow.h"
 
 
 SeqList::SeqList(QWidget *parent) : QWidget(parent)
@@ -7,23 +8,22 @@ SeqList::SeqList(QWidget *parent) : QWidget(parent)
     vboxLayout = new QVBoxLayout();
     vboxLayout->setContentsMargins(0, 0, 0, 0);
     vboxLayout->setSpacing(0);
-//    vboxLayout->addStretch();
     vboxLayout->addItem(new QSpacerItem(150, 10, QSizePolicy::Fixed, QSizePolicy::Expanding));
 
-    QHBoxLayout *hboxLayout = new QHBoxLayout();
-    hboxLayout->setContentsMargins(0, 0, 0, 0);
-    hboxLayout->setSpacing(0);
-    hboxLayout->addLayout(vboxLayout);
+//    QHBoxLayout *hboxLayout = new QHBoxLayout();
+//    hboxLayout->setContentsMargins(0, 0, 0, 0);
+//    hboxLayout->setSpacing(0);
+//    hboxLayout->addLayout(vboxLayout);
 
-    QWidget *seperator = new QWidget();
-    QPalette sepPal;
-    sepPal.setColor(QPalette::Window, QColor(73,73,73));
-    seperator->setPalette(sepPal);
-    seperator->setAutoFillBackground(true);
-    hboxLayout->addWidget(seperator);
-    seperator->setFixedWidth(2);
+//    QWidget *seperator = new QWidget();
+//    QPalette sepPal;
+//    sepPal.setColor(QPalette::Window, QColor(73,73,73));
+//    seperator->setPalette(sepPal);
+//    seperator->setAutoFillBackground(true);
+//    hboxLayout->addWidget(seperator);
+//    seperator->setFixedWidth(2);
 
-    setLayout(hboxLayout);
+    setLayout(vboxLayout);
 }
 
 Sequence *SeqList::newSequence()
@@ -48,5 +48,11 @@ Sequence *SeqList::getSequenceByIndex(int index)
 int SeqList::getSequenceIndex(Sequence *sequence)
 {
     return vboxLayout->indexOf(sequence);
+}
+
+QSize SeqList::sizeHint() const
+{
+    MainWindow *mainWin = MainWindow::getInstance();
+    return QSize(150, mainWin->height());
 }
 

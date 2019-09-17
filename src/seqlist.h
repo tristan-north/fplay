@@ -14,6 +14,7 @@ public:
     int numSequences();
     Sequence *getSequenceByIndex(int index);
     int getSequenceIndex(Sequence *sequence);
+    QSize sizeHint() const;
 
 signals:
 

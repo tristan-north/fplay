@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QTimer>
+#include <QScrollArea>
 #include "timeline.h"
 #include "frame.h"
 #include "seqlist.h"
@@ -26,6 +27,7 @@ public:
     void setFlippingSequence(Sequence *seq);
     QSize getViewportSize();
     SeqList *seqList;
+    QScrollArea *seqScrollArea;
     int m_currentFrameNum;
     bool m_playing;
 
