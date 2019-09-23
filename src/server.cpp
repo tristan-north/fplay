@@ -13,16 +13,11 @@ Server::Server(QObject *parent): QObject(parent)
     if(!m_server->listen(QHostAddress::Any, PORT)) {
         qInfo() << "Server could not start.";
     }
-    else {
-//        qInfo() << "Server started.";
-    }
 
 }
 
 void Server::newConnection()
 {
-//    qInfo() << "New connection.";
-
     QTcpSocket *socket = m_server->nextPendingConnection();
 
     QByteArray byteArray;
@@ -35,6 +30,11 @@ void Server::newConnection()
     }
 
     socket->close();
+
+    // When flipping an image of resolution less than 100x100 houdini only creates a header
+    // packet and never sends the full pixel data. Detect this by checking the byteArray size.
+    if(byteArray.size() < 1000)
+        return;
 
     new Frame(reinterpret_cast<const uchar*>(byteArray.constData()));
 }

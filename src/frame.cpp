@@ -1,6 +1,7 @@
 #include <QtDebug>
 #include <QtEndian>
 #include "frame.h"
+#include "half.h"
 #include "mainwindow.h"
 
 char *readElement(const uchar *data, uint &offset)
@@ -8,6 +9,8 @@ char *readElement(const uchar *data, uint &offset)
     uint elementSize;
     memcpy(&elementSize, data+offset, sizeof(uint));
     elementSize = qFromBigEndian(elementSize);
+    if(elementSize == 0)
+        return nullptr;
 
     offset += sizeof(uint) + 1;
 
@@ -31,10 +34,21 @@ QString getBufferAsHexStr(const unsigned char* buf, int buffsize) {
     return result;
 }
 
+uint8_t get8BitValueFromHalfFloatChars(const uchar *inChars) {
+    uchar chars[2];
+    chars[0] = inChars[0];
+    chars[1] = inChars[1];
+
+    half_float::half n = *reinterpret_cast<half_float::half *>(chars);
+
+    return uint8_t(n*255 + 0.5f);
+}
+
 
 Frame::Frame(const uchar *data) {
     m_resX = 0;
     m_resY = 0;
+    bool isHDR = false;
 
     // --- Read header ---
 
@@ -42,6 +56,9 @@ Frame::Frame(const uchar *data) {
     uint offset = 0;
     while(true) {
         char *string = readElement(data, offset);
+        if(string == nullptr)
+            return;
+
         QString qString(string);
 
         // First header string has info about the image eg:
@@ -50,6 +67,9 @@ Frame::Frame(const uchar *data) {
             QStringList list = qString.split(' ');
             m_resX = list[2].toInt();
             m_resY = list[3].toInt();
+
+            if(list[11] != "255")
+                isHDR = true;
         }
 
         // Get frame number from header
@@ -79,13 +99,32 @@ Frame::Frame(const uchar *data) {
     imageDataSize = qFromBigEndian(imageDataSize);
 //    qInfo() << "imageDataSize: " << imageDataSize;
     offset += sizeof(uint) + 1;
+    const uchar *pixelData = data+offset;
 
     // -------------------
 
 
-    QImage img(data+offset, m_resX, m_resY, QImage::Format_RGBX8888);
-    img = img.mirrored(false, true);
-    m_pixmap = QPixmap::fromImage(img);
+    if(isHDR) {
+        QImage img(m_resX, m_resY, QImage::Format_RGBX8888);
+
+        for(int y=0; y<m_resY; y++) {
+            uchar *scanline = img.scanLine(y);
+            for(int x=0; x<m_resX; x++) {
+                scanline[x*4] = get8BitValueFromHalfFloatChars(pixelData + y*m_resX*8 + x*8 + 0);
+                scanline[x*4+1] = get8BitValueFromHalfFloatChars(pixelData + y*m_resX*8 + x*8 + 2);
+                scanline[x*4+2] = get8BitValueFromHalfFloatChars(pixelData + y*m_resX*8 + x*8 + 4);
+            }
+        }
+
+        img = img.mirrored(false, true);
+        m_pixmap = QPixmap::fromImage(img);
+
+    }
+    else {
+        QImage img(pixelData, m_resX, m_resY, QImage::Format_RGBX8888);
+        img = img.mirrored(false, true);
+        m_pixmap = QPixmap::fromImage(img);
+    }
 
 
 

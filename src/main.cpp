@@ -5,6 +5,9 @@
 #include "mainwindow.h"
 #include "common.h"
 
+
+#include "half.h"
+
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);

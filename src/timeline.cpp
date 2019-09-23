@@ -81,6 +81,8 @@ void Timeline::mouseMoveEvent(QMouseEvent *event) {
     if( event->buttons() != Qt::LeftButton )
         return;
 
+    if(mainWin->m_playing)
+        mainWin->playButtonPushed();
 
     float x = static_cast<float>(event->pos().x());
 
