@@ -1,5 +1,6 @@
 #include <QtDebug>
 #include <QtEndian>
+#include <QElapsedTimer>
 #include "frame.h"
 #include "half.h"
 #include "mainwindow.h"
@@ -35,11 +36,8 @@ QString getBufferAsHexStr(const unsigned char* buf, int buffsize) {
 }
 
 uint8_t get8BitValueFromHalfFloatChars(const uchar *inChars) {
-    uchar chars[2];
-    chars[0] = inChars[0];
-    chars[1] = inChars[1];
 
-    half_float::half n = *reinterpret_cast<half_float::half *>(chars);
+    half_float::half n = *reinterpret_cast<const half_float::half *>(inChars);
 
     return uint8_t(n*255 + 0.5f);
 }
@@ -103,9 +101,11 @@ Frame::Frame(const uchar *data) {
 
     // -------------------
 
-
     if(isHDR) {
         QImage img(m_resX, m_resY, QImage::Format_RGBX8888);
+
+//        QElapsedTimer timer;
+//        timer.start();
 
         for(int y=0; y<m_resY; y++) {
             uchar *scanline = img.scanLine(y);
@@ -113,8 +113,14 @@ Frame::Frame(const uchar *data) {
                 scanline[x*4] = get8BitValueFromHalfFloatChars(pixelData + y*m_resX*8 + x*8 + 0);
                 scanline[x*4+1] = get8BitValueFromHalfFloatChars(pixelData + y*m_resX*8 + x*8 + 2);
                 scanline[x*4+2] = get8BitValueFromHalfFloatChars(pixelData + y*m_resX*8 + x*8 + 4);
+
+//                scanline[x*4] =   *(pixelData + y*m_resX*8 + x*8 + 0);
+//                scanline[x*4+1] = *(pixelData + y*m_resX*8 + x*8 + 2);
+//                scanline[x*4+2] = *(pixelData + y*m_resX*8 + x*8 + 4);
             }
         }
+
+//        qDebug() << "Converting: " << timer.elapsed() << "milliseconds";
 
         img = img.mirrored(false, true);
         m_pixmap = QPixmap::fromImage(img);

@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QEventLoop>
 #include "server.h"
 #include "frame.h"
 #include "common.h"
@@ -37,5 +38,7 @@ void Server::newConnection()
         return;
 
     new Frame(reinterpret_cast<const uchar*>(byteArray.constData()));
+
+    qApp->processEvents(); // Give the gui a chance to show the new frame before processing another
 }
 
