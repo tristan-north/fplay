@@ -49,6 +49,16 @@ Frame *Sequence::getFrameByIndex(int frameIdx)
 
 Frame *Sequence::getLastFrame()
 {
+    if(m_frames.data() == nullptr) {
+        qInfo() << "m_frames.data() nullptr";
+        return nullptr;
+    }
+    Frame **test = m_frames.data();
+    Frame *test2 = *m_frames.data();
+
+    Frame *test3 = m_frames.last();
+
+
     return m_frames.last();
 }
 
@@ -59,7 +69,10 @@ void Sequence::deleteSeq()
         delete itFrames.next();
     }
 
-    delete this;
+    MainWindow *mainWin = MainWindow::getInstance();
+
+    if(mainWin->getFlippingSequence() == this)
+        mainWin->setFlippingSequence(nullptr);
 }
 
 

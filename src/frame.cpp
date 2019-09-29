@@ -139,7 +139,14 @@ void Frame::finishInitInMainThread()
         isNewSeq = true;
     else {
         // If the new frame number is 1 after the last frame of currentlyFlippingSeq it's part of the same sequence
+        if(mainWindow->getFlippingSequence()->getLastFrame() == nullptr) {
+            qInfo() << "mainWindow->getFlippingSequence()->getLastFrame() == nullptr";
+            return;
+        }
+
+
         int lastFrameNum = mainWindow->getFlippingSequence()->getLastFrame()->m_frameNum;
+
         if(m_frameNum != lastFrameNum+1) {
             isNewSeq = true;
         }

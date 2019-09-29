@@ -255,6 +255,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             setPlayingSequence(seqList->getSequenceByIndex(currentIndex-1));
 
         seqToDelete->deleteSeq();
+        delete seqToDelete;
     }
     else if (event->key() == Qt::Key_Space) {
         playButtonPushed();
