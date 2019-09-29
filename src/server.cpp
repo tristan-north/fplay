@@ -1,23 +1,26 @@
 #include <QApplication>
 #include <QEventLoop>
+#include <QTcpSocket>
 #include "server.h"
 #include "frame.h"
 #include "common.h"
 
 
-Server::Server(QObject *parent): QObject(parent)
+void Server::run()
 {
-    m_server = new QTcpServer(this);
+    m_server = new QTcpServer();
 
-    connect(m_server, SIGNAL(newConnection()), this, SLOT(newConnection()));
-
-    if(!m_server->listen(QHostAddress::Any, PORT)) {
+    if(!m_server->listen(QHostAddress::LocalHost, PORT)) {
         qInfo() << "Server could not start.";
+        return;
     }
 
+    connect(m_server, SIGNAL(newConnection()), this, SLOT(handleConnection()), Qt::DirectConnection);
+
+    exec();  // Start event loop
 }
 
-void Server::newConnection()
+void Server::handleConnection()
 {
     QTcpSocket *socket = m_server->nextPendingConnection();
 
@@ -37,8 +40,13 @@ void Server::newConnection()
     if(byteArray.size() < 1000)
         return;
 
-    new Frame(reinterpret_cast<const uchar*>(byteArray.constData()));
+    Frame *newFrame = new Frame(reinterpret_cast<const uchar*>(byteArray.constData()));
 
-    qApp->processEvents(); // Give the gui a chance to show the new frame before processing another
+    newFrame->moveToThread(QApplication::instance()->thread());  // Move to main thread
+
+    QMetaObject::invokeMethod(newFrame, "finishInitInMainThread", Qt::QueuedConnection);
 }
+
+
+
 

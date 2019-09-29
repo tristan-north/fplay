@@ -1,12 +1,11 @@
 #include <QApplication>
 #include <QDir>
 #include <QRegularExpression>
-#include "server.h"
 #include "mainwindow.h"
+#include "server.h"
 #include "common.h"
-
-
 #include "half.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -30,10 +29,17 @@ int main(int argc, char *argv[])
 
     // Create app window
     MainWindow mainWin;
-    Server mServer;
     mainWin.show();
 
-    return app.exec();
+    Server server(&mainWin);
+    server.start();
+
+    app.exec();
+
+    server.quit();
+    server.wait(); // Wait for thread to actually stop to avoid Qt error message output.
+
+    return 0;
 }
 
 

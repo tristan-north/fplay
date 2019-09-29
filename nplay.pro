@@ -22,7 +22,8 @@ SOURCES += \
     src/frame.cpp \
     src/timeline.cpp \
     src/seqlist.cpp \
-    src/sequence.cpp
+    src/sequence.cpp \
+    src/playbutton.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -37,4 +38,8 @@ HEADERS += \
     src/seqlist.h \
     src/sequence.h \
     src/common.h \
-    src/half.h
+    src/half.h \
+    src/playbutton.h
+
+RESOURCES += \
+    nplay.qrc

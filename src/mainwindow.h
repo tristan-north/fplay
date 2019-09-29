@@ -12,6 +12,7 @@
 #include "frame.h"
 #include "seqlist.h"
 #include "sequence.h"
+#include "playbutton.h"
 
 
 class MainWindow : public QMainWindow
@@ -45,7 +46,7 @@ protected:
 private:
     QLabel m_label;
     static MainWindow *instance;
-    QPushButton *m_playButton;
+    PlayButton *m_playButton;
     QLineEdit *m_currentFrameBox;
     Timeline *m_timeline;
     Sequence *m_currentlyPlayingSeq;

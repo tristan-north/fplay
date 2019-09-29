@@ -1,6 +1,7 @@
 #include <QtDebug>
 #include <QtEndian>
 #include <QElapsedTimer>
+#include <QThread>
 #include "frame.h"
 #include "half.h"
 #include "mainwindow.h"
@@ -102,37 +103,32 @@ Frame::Frame(const uchar *data) {
     // -------------------
 
     if(isHDR) {
-        QImage img(m_resX, m_resY, QImage::Format_RGBX8888);
-
-//        QElapsedTimer timer;
-//        timer.start();
+        m_qImage = QImage(m_resX, m_resY, QImage::Format_RGBX8888);
 
         for(int y=0; y<m_resY; y++) {
-            uchar *scanline = img.scanLine(y);
+            uchar *scanline = m_qImage.scanLine(y);
             for(int x=0; x<m_resX; x++) {
                 scanline[x*4] = get8BitValueFromHalfFloatChars(pixelData + y*m_resX*8 + x*8 + 0);
                 scanline[x*4+1] = get8BitValueFromHalfFloatChars(pixelData + y*m_resX*8 + x*8 + 2);
                 scanline[x*4+2] = get8BitValueFromHalfFloatChars(pixelData + y*m_resX*8 + x*8 + 4);
-
-//                scanline[x*4] =   *(pixelData + y*m_resX*8 + x*8 + 0);
-//                scanline[x*4+1] = *(pixelData + y*m_resX*8 + x*8 + 2);
-//                scanline[x*4+2] = *(pixelData + y*m_resX*8 + x*8 + 4);
             }
         }
 
-//        qDebug() << "Converting: " << timer.elapsed() << "milliseconds";
-
-        img = img.mirrored(false, true);
-        m_pixmap = QPixmap::fromImage(img);
+        m_qImage = m_qImage.mirrored(false, true);
 
     }
     else {
-        QImage img(pixelData, m_resX, m_resY, QImage::Format_RGBX8888);
-        img = img.mirrored(false, true);
-        m_pixmap = QPixmap::fromImage(img);
+        m_qImage = QImage(pixelData, m_resX, m_resY, QImage::Format_RGBX8888);
+        m_qImage = m_qImage.mirrored(false, true);
     }
 
+}
 
+
+void Frame::finishInitInMainThread()
+{
+    m_pixmap = QPixmap::fromImage(m_qImage);
+    m_qImage = QImage(); // QImage uses implicit data sharing so this deletes the m_qImage data
 
     // Figure out if this frame is a new sequence or not
     bool isNewSeq = false;
@@ -169,6 +165,7 @@ Frame::Frame(const uchar *data) {
         if(!mainWindow->m_playing && mainWindow->getPlayingSequence() == mainWindow->getFlippingSequence())
             mainWindow->showFrame(this);
     }
+
 }
 
 
