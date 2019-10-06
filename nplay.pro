@@ -43,3 +43,5 @@ HEADERS += \
 
 RESOURCES += \
     nplay.qrc
+
+DISTFILES +=

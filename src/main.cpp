@@ -10,6 +10,7 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    app.setWindowIcon(QIcon(":/appIcon.png"));
 
     // Create .flipbook_lock file
     QString fileText = QStringLiteral("0 %1\n").arg(PORT);

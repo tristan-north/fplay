@@ -17,7 +17,6 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyP
     showNextFrameTimer.setInterval(int(1000.0f/24.0f));
     connect(&showNextFrameTimer, SIGNAL(timeout()), this, SLOT(showNextFrame()));
 
-
     resize(900,550);
     QPalette pal = QApplication::palette();
     pal.setColor(QPalette::Window, QColor(46,46,46));

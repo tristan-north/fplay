@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>play.png</file>
         <file>playDown.png</file>
+        <file>appIcon.png</file>
     </qresource>
 </RCC>
