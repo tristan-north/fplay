@@ -5,6 +5,8 @@
 #include <QKeyEvent>
 #include <QScrollArea>
 #include <QScrollBar>
+#include <QStyle>
+#include <QFileDialog>
 #include "mainwindow.h"
 #include "common.h"
 
@@ -120,7 +122,6 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyP
 
     connect(m_playButton, SIGNAL(released()), this, SLOT(playButtonPushed()));
     hboxLayoutBot->addWidget(m_playButton);
-//    m_playButton->setFixedSize(60, 30);
     m_playButton->setFocusPolicy(Qt::NoFocus);
 
     // Current frame text box
@@ -140,8 +141,18 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyP
     // Timeline
     m_timeline = new Timeline(centralWidget());
     hboxLayoutBot->addWidget(m_timeline);
+
+    // Export button
+    m_exportButton = new QPushButton(centralWidget());
+    m_exportButton->setIcon(style()->standardIcon(QStyle::SP_DriveFDIcon));
+    m_exportButton->setStyleSheet("color: rgb(200, 200, 200); background-color: rgb(50, 50, 50);");
+    m_exportButton->setFixedSize(30, 30);
+    hboxLayoutBot->addWidget(m_exportButton);
+    connect(m_exportButton, SIGNAL(released()), this, SLOT(exportButtonPushed()));
+
     vboxLayout->addSpacing(4);
     vboxLayout->addLayout(hboxLayoutBot);
+
 
     setFocus(); // Set focus to main window otherwise the frame num text widget gets it on startup
 
@@ -204,6 +215,33 @@ void MainWindow::playButtonPushed() {
         showNextFrame();
         showNextFrameTimer.start();
     }
+}
+
+void MainWindow::exportButtonPushed()
+{
+    // TODO: Save jpg files to a tmp dir. Run the ffmpeg command:
+    // ffmpeg -r 24 -i /home/tristan/Desktop/testSeq/untitled.%d.jpg -vcodec mjpeg -q:v 1 /home/tristan/Desktop/testSeq/hello_world_1.mov
+    // Clean up jpgs
+    // Have some sort of dialog showing progress
+
+    if(!m_currentlyPlayingSeq)
+        return;
+
+//    int lastFrameNum = m_currentlyPlayingSeq->getLastFrame()->m_frameNum;
+
+//    QString dir = QFileDialog::getExistingDirectory(this, tr("Choose Directory"), "/", QFileDialog::ShowDirsOnly);
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "/home/jana/untitled.$F.jpg", tr("Images (*.jpg)"));
+
+    qWarning() << fileName;
+
+    for(int i=0; i < m_currentlyPlayingSeq->getNumFrames(); i++) {
+        Frame *frame = m_currentlyPlayingSeq->getFrameByIndex(i);
+
+
+        frame->m_pixmap.save(fileName.arg(frame->m_frameNum), Q_NULLPTR, 100);
+//        frame->m_pixmap.save(QString("/home/tristan/Desktop/test.%1.jpg").arg(frame->m_frameNum), Q_NULLPTR, 100);
+    }
+
 }
 
 void MainWindow::currentFrameBoxSet() {

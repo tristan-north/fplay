@@ -36,6 +36,7 @@ signals:
 
 public slots:
     void playButtonPushed();
+    void exportButtonPushed();
     void showNextFrame();
     void currentFrameBoxSet();
     void resizeMainWindow();
@@ -47,6 +48,7 @@ private:
     QLabel m_label;
     static MainWindow *instance;
     PlayButton *m_playButton;
+    QPushButton *m_exportButton;
     QLineEdit *m_currentFrameBox;
     Timeline *m_timeline;
     Sequence *m_currentlyPlayingSeq;
