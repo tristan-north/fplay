@@ -7,13 +7,14 @@
 #include <QScrollBar>
 #include <QStyle>
 #include <QFileDialog>
+#include <QProcess>
 #include "mainwindow.h"
 #include "common.h"
 
 
 MainWindow *MainWindow::instance = nullptr;
 
-MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyPlayingSeq(nullptr), m_currentlyFlippingSeq(nullptr)
+MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyPlayingSeq(nullptr), m_currentlyFlippingSeq(nullptr), m_exportFilePath("./export.mov")
 {
     instance = this;
     showNextFrameTimer.setInterval(int(1000.0f/24.0f));
@@ -219,28 +220,55 @@ void MainWindow::playButtonPushed() {
 
 void MainWindow::exportButtonPushed()
 {
-    // TODO: Save jpg files to a tmp dir. Run the ffmpeg command:
-    // ffmpeg -r 24 -i /home/tristan/Desktop/testSeq/untitled.%d.jpg -vcodec mjpeg -q:v 1 /home/tristan/Desktop/testSeq/hello_world_1.mov
-    // Clean up jpgs
-    // Have some sort of dialog showing progress
-
     if(!m_currentlyPlayingSeq)
         return;
 
-//    int lastFrameNum = m_currentlyPlayingSeq->getLastFrame()->m_frameNum;
 
-//    QString dir = QFileDialog::getExistingDirectory(this, tr("Choose Directory"), "/", QFileDialog::ShowDirsOnly);
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "/home/jana/untitled.$F.jpg", tr("Images (*.jpg)"));
+    // Set timecode start frame
 
-    qWarning() << fileName;
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), m_exportFilePath, tr("Movies (*.mov)"));
+    if(fileName=="")
+        return;
+    m_exportFilePath = fileName;
+
+    QDir tmpDir("/var/tmp/fplay_export");
+    tmpDir.mkpath(".");
+    foreach(QString dirFile, tmpDir.entryList(QStringList("*"))) {
+        tmpDir.remove(dirFile);
+    }
+
 
     for(int i=0; i < m_currentlyPlayingSeq->getNumFrames(); i++) {
         Frame *frame = m_currentlyPlayingSeq->getFrameByIndex(i);
 
-
-        frame->m_pixmap.save(fileName.arg(frame->m_frameNum), Q_NULLPTR, 100);
-//        frame->m_pixmap.save(QString("/home/tristan/Desktop/test.%1.jpg").arg(frame->m_frameNum), Q_NULLPTR, 100);
+        frame->m_pixmap.save(tmpDir.path() + QString("/fplay_export.%1.jpg").arg(QString::number(frame->m_frameNum), 4, '0'), Q_NULLPTR, 100);
     }
+
+
+    int firstFrameNum = m_currentlyPlayingSeq->getFrameByIndex(0)->m_frameNum;
+    int timecodeFrames = firstFrameNum % 24;
+    int timecodeSeconds = firstFrameNum / 24;
+    int timecodeMinutes = timecodeSeconds / 60;
+    timecodeSeconds = timecodeSeconds - timecodeMinutes*60;
+    QString timecode = QString("timecode=00:%1:%2:%3").arg(QString::number(timecodeMinutes), 2, '0').arg(QString::number(timecodeSeconds), 2, '0').arg(QString::number(timecodeFrames), 2, '0');
+
+    qWarning() << timecode;
+
+
+    QProcess ffmpeg;
+    ffmpeg.start("ffmpeg", QStringList() <<
+                 "-y" <<           // Force overrwite
+                 "-r" << "24" <<   // Frame rate
+                 "-pattern_type" << "glob" <<
+                 "-i" << QString("%1/fplay_export.*.jpg").arg(tmpDir.path()) <<
+                 "-vcodec" << "mjpeg" <<
+                 "-q:v" << "1" <<  // Quality
+                 "-metadata" << timecode <<
+                 fileName);
+    ffmpeg.waitForFinished();
+
+//    qWarning() << ffmpeg.readAllStandardError();
+//    qWarning() << ffmpeg.readAllStandardOutput();
 
 }
 

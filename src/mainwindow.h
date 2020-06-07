@@ -55,6 +55,7 @@ private:
     Sequence *m_currentlyFlippingSeq;
     QTimer showNextFrameTimer;
     QWidget *m_viewportBkgTop, *m_viewportBkgBot, *m_viewportBkgLeft, *m_viewportBkgRight;
+    QString m_exportFilePath;
 };
 
 #endif // MAINWINDOW_H
