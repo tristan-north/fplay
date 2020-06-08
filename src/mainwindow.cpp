@@ -14,7 +14,7 @@
 
 MainWindow *MainWindow::instance = nullptr;
 
-MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyPlayingSeq(nullptr), m_currentlyFlippingSeq(nullptr), m_exportFilePath("./fplay_seq.mov")
+MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyPlayingSeq(nullptr), m_currentlyFlippingSeq(nullptr), m_exportFilePath("./fplay_export.mov")
 {
     instance = this;
     showNextFrameTimer.setInterval(int(1000.0f/24.0f));
@@ -250,8 +250,6 @@ void MainWindow::exportButtonPushed()
     timecodeSeconds = timecodeSeconds - timecodeMinutes*60;
     QString timecode = QString("timecode=00:%1:%2:%3").arg(QString::number(timecodeMinutes), 2, '0').arg(QString::number(timecodeSeconds), 2, '0').arg(QString::number(timecodeFrames), 2, '0');
 
-    qWarning() << timecode;
-
 
     QProcess ffmpeg;
     ffmpeg.start("ffmpeg", QStringList() <<
@@ -262,7 +260,9 @@ void MainWindow::exportButtonPushed()
                  "-vcodec" << "mjpeg" <<
                  "-q:v" << "1" <<  // Quality
                  "-metadata" << timecode <<
-                 "-metadata" << "PixelAspectRatio=1" <<
+                 "-aspect" << QString("%1:%2").arg(m_currentlyPlayingSeq->getFrameByIndex(0)->m_resX).arg(m_currentlyPlayingSeq->getFrameByIndex(0)->m_resY) <<
+//                 "-metadata" << "\"PixelAspectRatio=1\"" <<
+
                  fileName);
     ffmpeg.waitForFinished();
 
