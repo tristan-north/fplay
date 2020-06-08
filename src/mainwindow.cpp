@@ -14,7 +14,7 @@
 
 MainWindow *MainWindow::instance = nullptr;
 
-MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyPlayingSeq(nullptr), m_currentlyFlippingSeq(nullptr), m_exportFilePath("./export.mov")
+MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyPlayingSeq(nullptr), m_currentlyFlippingSeq(nullptr), m_exportFilePath("./fplay_seq.mov")
 {
     instance = this;
     showNextFrameTimer.setInterval(int(1000.0f/24.0f));
@@ -224,8 +224,6 @@ void MainWindow::exportButtonPushed()
         return;
 
 
-    // Set timecode start frame
-
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), m_exportFilePath, tr("Movies (*.mov)"));
     if(fileName=="")
         return;
@@ -264,6 +262,7 @@ void MainWindow::exportButtonPushed()
                  "-vcodec" << "mjpeg" <<
                  "-q:v" << "1" <<  // Quality
                  "-metadata" << timecode <<
+                 "-metadata" << "PixelAspectRatio=1" <<
                  fileName);
     ffmpeg.waitForFinished();
 
