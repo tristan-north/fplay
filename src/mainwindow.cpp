@@ -127,6 +127,7 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyP
 
     // Current frame text box
     m_currentFrameBox = new QLineEdit(centralWidget());
+//    m_currentFrameBox->setFocusPolicy(Qt::NoFocus);
     m_currentFrameBox->setValidator(new QIntValidator(-99999, 99999, this));
 
     QPalette framePal = QApplication::palette();
@@ -145,6 +146,7 @@ MainWindow::MainWindow() : m_currentFrameNum(-1), m_playing(false), m_currentlyP
 
     // Export button
     m_exportButton = new QPushButton(centralWidget());
+    m_exportButton->setFocusPolicy(Qt::NoFocus);
     m_exportButton->setIcon(style()->standardIcon(QStyle::SP_DriveFDIcon));
     m_exportButton->setStyleSheet("color: rgb(200, 200, 200); background-color: rgb(50, 50, 50);");
     m_exportButton->setFixedSize(30, 30);
